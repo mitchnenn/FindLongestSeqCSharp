@@ -31,7 +31,7 @@ namespace FindLongestSeqCSharp
         /// </summary>
         private int[] _P;
 
-        private int _longestSeqIndex;
+        private int _L;
         private int _currentInputIndex;
 
         public LongestSeqAlgorithm(IReadOnlyList<int> x)
@@ -43,7 +43,7 @@ namespace FindLongestSeqCSharp
         {
             _P = new int[_X.Count];
             _M = new int[_X.Count + 1];
-            _longestSeqIndex = 0;
+            _L = 0;
         }
 
         public IEnumerable<int> FindLongestIncreasingSeq()
@@ -59,22 +59,38 @@ namespace FindLongestSeqCSharp
         private IEnumerable<int> FindLongestSeq(CompareFunc compareFunc)
         {
             Initialize();
+            
             for (var currentInputIndex = 0; currentInputIndex < _X.Count; currentInputIndex++)
             {
                 _currentInputIndex = currentInputIndex;
-                var newLongestSeqIndex = SearchLargestPossibleValue(compareFunc);
-                _P[currentInputIndex] = _M[newLongestSeqIndex - 1];
-                _M[newLongestSeqIndex] = currentInputIndex;
-                if (newLongestSeqIndex > _longestSeqIndex)
-                    _longestSeqIndex = newLongestSeqIndex;
+                
+                // After searching, newL is 1 greater than the
+                // length of the longest prefix of X[i]
+                var newL = BinarySearchLargestValue(compareFunc);
+                
+                // The predecessor of X[i] is the last index of 
+                // the subsequence of length newL-1
+                _P[currentInputIndex] = _M[newL - 1];
+                _M[newL] = currentInputIndex;
+                
+                // If we found a subsequence longer than any we've
+                // found yet, update L
+                if (newL > _L)
+                    _L = newL;
             }
             return ReconstructLongestSeq();
         }
 
-        private int SearchLargestPossibleValue(CompareFunc compareFunc)
+        /// <summary>
+        /// Binary search for the largest positive j ≤ L
+            /// such that X[M[j]] <= X[i] or X[M[j]] >= X[i] 
+        /// </summary>
+        /// <param name="compareFunc"></param>
+        /// <returns></returns>
+        private int BinarySearchLargestValue(CompareFunc compareFunc)
         {
             var lo = 1;
-            var hi = _longestSeqIndex;
+            var hi = _L;
             while (lo <= hi)
             {
                 var mid = (int) Math.Ceiling((lo + hi) / 2.0);
@@ -86,27 +102,31 @@ namespace FindLongestSeqCSharp
             return lo;
         }
 
+        /// <summary>
+        /// Reconstruct the longest increasing subsequence
+        /// </summary>
+        /// <returns></returns>
         private IEnumerable<int> ReconstructLongestSeq()
         {
-            var result = new int[_longestSeqIndex];
-            var k = _M[_longestSeqIndex];
-            for (var index = _longestSeqIndex - 1; index >= 0; index--)
+            var S = new int[_L];
+            var k = _M[_L];
+            for (var index = _L - 1; index >= 0; index--)
             {
-                result[index] = _X[k];
+                S[index] = _X[k];
                 k = _P[k];
             }
-            return result;
+            return S;
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"{nameof(_currentInputIndex)}:{_currentInputIndex}");
-            sb.AppendLine($"{nameof(_longestSeqIndex)}:{_longestSeqIndex}");
-            sb.AppendLine($"Input:\t\t\t\t[{string.Join(",", _X)}]");
-            sb.AppendLine($"CurrentLongestSeqIndexes:\t[{string.Join(",", _P)}]");
-            sb.AppendLine($"IntermediateIndexes:\t\t[{string.Join(",", _M)}]");
-            sb.AppendLine($"Longest Seq:\t\t\t[{string.Join(",", ReconstructLongestSeq())}]");
+            sb.AppendLine($"i:{_currentInputIndex}");
+            sb.AppendLine($"_L:{_L}");
+            sb.AppendLine($"X:\t[{string.Join(",", _X)}]");
+            sb.AppendLine($"P:\t[{string.Join(",", _P)}]");
+            sb.AppendLine($"M:\t[{string.Join(",", _M)}]");
+            sb.AppendLine($"S:\t[{string.Join(",", ReconstructLongestSeq())}]");
             return sb.ToString();
         }
     }
