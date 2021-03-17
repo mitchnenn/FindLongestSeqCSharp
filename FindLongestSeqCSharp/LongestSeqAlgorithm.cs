@@ -4,8 +4,13 @@ using System.Text;
 
 namespace FindLongestSeqCSharp
 {
-    public class State
+    public class LongestSeqAlgorithm
     {
+        private delegate bool CompareFunc(int x, int y);
+
+        private static bool Increasing(int x, int y) { return y > x; }
+        private static bool Decreasing(int x, int y) { return x > y; }
+        
         /// <summary>
         /// Denote the sequence values as X[0], X[1], etc. Then, after
         /// processing X[i], the algorithm will have stored values in
@@ -19,55 +24,61 @@ namespace FindLongestSeqCSharp
         /// represents the length of the increasing subsequence, and k ≥ 0
         /// represents the index of its termination.
         /// </summary>
-        public int[] _M;
+        private int[] _M;
         /// <summary>
         /// P[k] — stores the index of the predecessor of X[k] in the longest
         /// increasing subsequence ending at X[k].
         /// </summary>
-        public int[] _P;
-        
-        public State(IReadOnlyList<int> x)
+        private int[] _P;
+
+        private int _longestSeqIndex;
+        private int _currentInputIndex;
+
+        public LongestSeqAlgorithm(IReadOnlyList<int> x)
         {
             _X = x;
-            Initialize();
         }
-
-        public int InputLength => _X.Count;
-        
-        public int LongestSeqIndex { get; set; }
-        
-        public int CurrentInputIndex { get; set; }
 
         private void Initialize()
         {
-            _P = new int[InputLength];
-            _M = new int[InputLength + 1];
-            LongestSeqIndex = 0;
+            _P = new int[_X.Count];
+            _M = new int[_X.Count + 1];
+            _longestSeqIndex = 0;
+        }
+
+        public IEnumerable<int> FindLongestIncreasingSeq()
+        {
+            return FindLongestSeq(Increasing);
+        }
+
+        public IEnumerable<int> FindLongestDecreasingSeq()
+        {
+            return FindLongestSeq(Decreasing);
         }
         
-        public IEnumerable<int> FindLongestIncSeq()
+        private IEnumerable<int> FindLongestSeq(CompareFunc compareFunc)
         {
-            for (var currentInputIndex = 0; currentInputIndex < InputLength; currentInputIndex++)
+            Initialize();
+            for (var currentInputIndex = 0; currentInputIndex < _X.Count; currentInputIndex++)
             {
-                CurrentInputIndex = currentInputIndex;
-                var newLongestSeqIndex = SearchLargestPossibleValue();
+                _currentInputIndex = currentInputIndex;
+                var newLongestSeqIndex = SearchLargestPossibleValue(compareFunc);
                 _P[currentInputIndex] = _M[newLongestSeqIndex - 1];
                 _M[newLongestSeqIndex] = currentInputIndex;
-                if (newLongestSeqIndex > LongestSeqIndex)
-                    LongestSeqIndex = newLongestSeqIndex;
-                Console.WriteLine(this);
+                if (newLongestSeqIndex > _longestSeqIndex)
+                    _longestSeqIndex = newLongestSeqIndex;
             }
             return ReconstructLongestSeq();
         }
 
-        private int SearchLargestPossibleValue()
+        private int SearchLargestPossibleValue(CompareFunc compareFunc)
         {
             var lo = 1;
-            var hi = LongestSeqIndex;
+            var hi = _longestSeqIndex;
             while (lo <= hi)
             {
                 var mid = (int) Math.Ceiling((lo + hi) / 2.0);
-                if (_X[_M[mid]] < _X[CurrentInputIndex])
+                if (compareFunc(_X[_M[mid]], _X[_currentInputIndex]))
                     lo = mid + 1;
                 else
                     hi = mid - 1;
@@ -77,9 +88,9 @@ namespace FindLongestSeqCSharp
 
         private IEnumerable<int> ReconstructLongestSeq()
         {
-            var result = new int[LongestSeqIndex];
-            var k = _M[LongestSeqIndex];
-            for (var index = LongestSeqIndex - 1; index >= 0; index--)
+            var result = new int[_longestSeqIndex];
+            var k = _M[_longestSeqIndex];
+            for (var index = _longestSeqIndex - 1; index >= 0; index--)
             {
                 result[index] = _X[k];
                 k = _P[k];
@@ -90,8 +101,8 @@ namespace FindLongestSeqCSharp
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"{nameof(CurrentInputIndex)}:{CurrentInputIndex}");
-            sb.AppendLine($"{nameof(LongestSeqIndex)}:{LongestSeqIndex}");
+            sb.AppendLine($"{nameof(_currentInputIndex)}:{_currentInputIndex}");
+            sb.AppendLine($"{nameof(_longestSeqIndex)}:{_longestSeqIndex}");
             sb.AppendLine($"Input:\t\t\t\t[{string.Join(",", _X)}]");
             sb.AppendLine($"CurrentLongestSeqIndexes:\t[{string.Join(",", _P)}]");
             sb.AppendLine($"IntermediateIndexes:\t\t[{string.Join(",", _M)}]");
