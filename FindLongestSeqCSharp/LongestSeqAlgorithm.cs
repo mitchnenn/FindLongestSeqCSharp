@@ -78,6 +78,7 @@ namespace FindLongestSeqCSharp
                 if (newL > _L)
                     _L = newL;
             }
+            
             return ReconstructLongestSeq();
         }
 
