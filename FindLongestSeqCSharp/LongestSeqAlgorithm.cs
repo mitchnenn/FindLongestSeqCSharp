@@ -81,9 +81,10 @@ namespace FindLongestSeqCSharp
 
         /// <summary>
         /// Binary search for the largest positive j ≤ L
-            /// such that X[M[j]] <= X[i] or X[M[j]] >= X[i] 
+        /// such that X[M[j]] <= X[i] or X[M[j]] >= X[i] 
         /// </summary>
         /// <param name="compareFunc"></param>
+        /// <param name="currentInputIndex"></param>
         /// <returns></returns>
         private int BinarySearchLargestValue(CompareFunc compareFunc, int currentInputIndex)
         {
