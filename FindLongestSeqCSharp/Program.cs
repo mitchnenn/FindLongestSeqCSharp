@@ -31,8 +31,8 @@ namespace FindLongestSeqCSharp
             var longestDecSeq = state.FindLongestDecreasingSeq();
             stopWatch.Stop();
             Console.WriteLine($"Find longest seq took {stopWatch.ElapsedMilliseconds} ms");
-            Console.WriteLine(string.Join(",", longestIncSeq));        
-            Console.WriteLine(string.Join(",", longestDecSeq));        
+            Console.WriteLine(string.Join(" ", longestIncSeq));        
+            Console.WriteLine(string.Join(" ", longestDecSeq));        
         }
     }
 }

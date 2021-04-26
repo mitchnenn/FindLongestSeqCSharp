@@ -32,7 +32,6 @@ namespace FindLongestSeqCSharp
         private int[] _P;
 
         private int _L;
-        private int _currentInputIndex;
 
         public LongestSeqAlgorithm(IReadOnlyList<int> x)
         {
@@ -62,11 +61,9 @@ namespace FindLongestSeqCSharp
             
             for (var currentInputIndex = 0; currentInputIndex < _X.Count; currentInputIndex++)
             {
-                _currentInputIndex = currentInputIndex;
-                
                 // After searching, newL is 1 greater than the
                 // length of the longest prefix of X[i]
-                var newL = BinarySearchLargestValue(compareFunc);
+                var newL = BinarySearchLargestValue(compareFunc, currentInputIndex);
                 
                 // The predecessor of X[i] is the last index of 
                 // the subsequence of length newL-1
@@ -88,14 +85,14 @@ namespace FindLongestSeqCSharp
         /// </summary>
         /// <param name="compareFunc"></param>
         /// <returns></returns>
-        private int BinarySearchLargestValue(CompareFunc compareFunc)
+        private int BinarySearchLargestValue(CompareFunc compareFunc, int currentInputIndex)
         {
             var lo = 1;
             var hi = _L;
             while (lo <= hi)
             {
                 var mid = (int) Math.Ceiling((lo + hi) / 2.0);
-                if (compareFunc(_X[_M[mid]], _X[_currentInputIndex]))
+                if (compareFunc(_X[_M[mid]], _X[currentInputIndex]))
                     lo = mid + 1;
                 else
                     hi = mid - 1;
@@ -122,7 +119,6 @@ namespace FindLongestSeqCSharp
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"i:{_currentInputIndex}");
             sb.AppendLine($"_L:{_L}");
             sb.AppendLine($"X:\t[{string.Join(",", _X)}]");
             sb.AppendLine($"P:\t[{string.Join(",", _P)}]");
